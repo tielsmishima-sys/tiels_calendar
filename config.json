@@ -1,0 +1,49 @@
+{
+  "year": 2026,
+  "month": 3,
+
+  "schedule": {
+    "1":  "15-21",
+    "2":  "17-21",
+    "6":  "17-22",
+    "7":  "15-21",
+    "8":  "15-21",
+    "9":  "17-21",
+    "13": "17-22",
+    "14": "15-21",
+    "15": "15-21",
+    "16": "17-21",
+    "20": "15-21",
+    "21": "15-21",
+    "22": "15-21",
+    "23": "17-21",
+    "27": "17-22",
+    "28": "15-21",
+    "29": "15-21",
+    "30": "17-21"
+  },
+
+  "prev_month_schedule": {
+    "28": "15-21"
+  },
+
+  "next_month_schedule": {
+    "4": "15-21",
+    "5": "15-21"
+  },
+
+  "events": [],
+
+  "holidays": [20],
+  "prev_month_holidays": [],
+  "next_month_holidays": [],
+
+  "latin_font": "/System/Library/Fonts/Avenir.ttc",
+  "latin_font_bold": "/System/Library/Fonts/Avenir.ttc",
+  "latin_font_medium": "/System/Library/Fonts/Avenir.ttc",
+  "date_font": "/System/Library/Fonts/Supplemental/YuGothic-Bold.otf",
+  "japanese_font": "/System/Library/Fonts/ヒラギノ角ゴシック W2.ttc",
+
+  "bottom_text": "ご予約は 055-957-4500 / 070-8419-5489 にて承ります",
+  "output_filename": "calendar_2026_03.png"
+}
