@@ -404,8 +404,17 @@ def draw_event_box(draw, row_idx, start_col, end_col, text, fonts, y_first_row, 
     x_left = COL_X[start_col] - col_half
     x_right = COL_X[end_col] + col_half
 
-    # テキスト折り返し
+    # テキストが1行に収まるようボックス幅を自動拡張
     font = fonts['event_jp']
+    text_bbox = draw.textbbox((0, 0), text, font=font)
+    text_w = text_bbox[2] - text_bbox[0]
+    needed_w = text_w + EVENT_BOX_PAD_H * 2
+    box_w = x_right - x_left
+    if needed_w > box_w:
+        center_x = (x_left + x_right) / 2
+        x_left = center_x - needed_w / 2
+        x_right = center_x + needed_w / 2
+
     max_text_w = (x_right - x_left) - EVENT_BOX_PAD_H * 2
     lines = wrap_event_text(text, font, max_text_w, draw)
 

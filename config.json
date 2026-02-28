@@ -32,7 +32,7 @@
     "5": "15-21"
   },
 
-  "events": [],
+  "events": [{"name": "ボルシチナイト", "start": 9, "end": 9}],
 
   "holidays": [20],
   "prev_month_holidays": [],
