@@ -547,7 +547,7 @@ def generate_calendar(config):
 
             # 日付描画
             day_str = str(day)
-            trk = DATE_TRACKING if len(day_str) >= 2 else 0
+            trk = DATE_TRACKING if 10 <= day <= 19 else 0
             if needs_prefix:
                 prefix_text = prefix + "/"
                 prefix_bbox = draw.textbbox((0, 0), prefix_text, font=fonts['month_prefix'])
