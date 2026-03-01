@@ -39,10 +39,13 @@
   "next_month_holidays": [],
 
   "latin_font": "/System/Library/Fonts/Avenir.ttc",
+  "latin_font_index": 8,
   "latin_font_bold": "/System/Library/Fonts/Avenir.ttc",
+  "latin_font_bold_index": 4,
   "latin_font_medium": "/System/Library/Fonts/Avenir.ttc",
+  "latin_font_medium_index": 8,
   "date_font": "/System/Library/Fonts/Supplemental/YuGothic-Bold.otf",
-  "japanese_font": "/System/Library/Fonts/ヒラギノ角ゴシック W2.ttc",
+  "japanese_font": "/System/Library/Fonts/ヒラギノ角ゴシック W3.ttc",
 
   "bottom_text": "ご予約は 055-957-4500 / 070-8419-5489 にて承ります",
   "output_filename": "calendar_2026_03.png"

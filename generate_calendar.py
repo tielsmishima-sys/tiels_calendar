@@ -79,7 +79,7 @@ COLOR_ORANGE  = (240, 112, 80)     # 土日・祝日 (#F07050)
 COLOR_HEADER  = (100, 100, 100)    # 曜日ヘッダー
 
 # カラム（7列: MON-SUN）
-COL_X = [120, 260, 400, 540, 680, 820, 960]
+COL_X = [180, 300, 420, 540, 660, 780, 900]
 
 # 縦方向の基準位置
 Y_MONTH_NUM   = 130   # 月の数字の中心 Y
@@ -107,6 +107,8 @@ EVENT_BOX_PAD_V   = 6    # ボックス内の垂直パディング
 EVENT_BORDER_W    = 0.75  # 枠線の太さ
 EVENT_LINE_GAP    = 4    # 複数行テキストの行間
 
+DATE_TRACKING     = -3   # 2桁日付の文字間調整（負で詰め）
+
 DAY_NAMES = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"]
 
 
@@ -126,20 +128,31 @@ def load_config(config_path=None):
     return config
 
 
+def _load_font(path, size, index=0):
+    """フォントを読み込む。TTC の場合は index でウェイトを指定。"""
+    return ImageFont.truetype(path, size, index=index)
+
+
 def load_fonts(config):
     """フォントを読み込む"""
     fonts = {}
-    try:
-        fonts['month_num'] = ImageFont.truetype(config['latin_font_bold'], SIZE_MONTH_NUM)
-    except:
-        fonts['month_num'] = ImageFont.truetype(config['latin_font'], SIZE_MONTH_NUM)
 
-    fonts['year'] = ImageFont.truetype(config['latin_font'], SIZE_YEAR)
+    # TTC インデックス（config で指定可能、デフォルト 0）
+    latin_idx = config.get('latin_font_index', 0)
+    latin_bold_idx = config.get('latin_font_bold_index', 0)
+    latin_medium_idx = config.get('latin_font_medium_index', 0)
 
     try:
-        fonts['header'] = ImageFont.truetype(config['latin_font_medium'], SIZE_HEADER)
+        fonts['month_num'] = _load_font(config['latin_font_bold'], SIZE_MONTH_NUM, latin_bold_idx)
     except:
-        fonts['header'] = ImageFont.truetype(config['latin_font'], SIZE_HEADER)
+        fonts['month_num'] = _load_font(config['latin_font'], SIZE_MONTH_NUM, latin_idx)
+
+    fonts['year'] = _load_font(config['latin_font'], SIZE_YEAR, latin_idx)
+
+    try:
+        fonts['header'] = _load_font(config['latin_font_medium'], SIZE_HEADER, latin_medium_idx)
+    except:
+        fonts['header'] = _load_font(config['latin_font'], SIZE_HEADER, latin_idx)
 
     # 日付フォント（date_font が指定されていればそちらを優先）
     date_font_path = config.get('date_font', config['latin_font_bold'])
@@ -147,18 +160,18 @@ def load_fonts(config):
         fonts['date'] = ImageFont.truetype(date_font_path, SIZE_DATE)
     except:
         try:
-            fonts['date'] = ImageFont.truetype(config['latin_font_bold'], SIZE_DATE)
+            fonts['date'] = _load_font(config['latin_font_bold'], SIZE_DATE, latin_bold_idx)
         except:
-            fonts['date'] = ImageFont.truetype(config['latin_font'], SIZE_DATE)
+            fonts['date'] = _load_font(config['latin_font'], SIZE_DATE, latin_idx)
 
-    fonts['date_regular'] = ImageFont.truetype(config['latin_font'], SIZE_DATE)
-    fonts['month_prefix'] = ImageFont.truetype(config['latin_font'], SIZE_MONTH_PREFIX)
-    fonts['hours'] = ImageFont.truetype(config['latin_font'], SIZE_HOURS)
-    fonts['closed'] = ImageFont.truetype(config['latin_font'], SIZE_CLOSED)
+    fonts['date_regular'] = _load_font(config['latin_font'], SIZE_DATE, latin_idx)
+    fonts['month_prefix'] = _load_font(config['latin_font'], SIZE_MONTH_PREFIX, latin_idx)
+    fonts['hours'] = _load_font(config['latin_font'], SIZE_HOURS, latin_idx)
+    fonts['closed'] = _load_font(config['latin_font'], SIZE_CLOSED, latin_idx)
     fonts['bottom_jp'] = ImageFont.truetype(config['japanese_font'], SIZE_BOTTOM)
-    fonts['bottom_latin'] = ImageFont.truetype(config['latin_font'], SIZE_BOTTOM)
+    fonts['bottom_latin'] = _load_font(config['latin_font'], SIZE_BOTTOM, latin_idx)
     fonts['event_jp'] = ImageFont.truetype(config['japanese_font'], SIZE_EVENT)
-    fonts['event_latin'] = ImageFont.truetype(config['latin_font'], SIZE_EVENT)
+    fonts['event_latin'] = _load_font(config['latin_font'], SIZE_EVENT, latin_idx)
 
     return fonts
 
@@ -242,12 +255,29 @@ def get_month_prefix(month_offset, year, month):
     return ""
 
 
-def draw_centered_text(draw, x, y, text, font, color):
-    """中央揃えでテキストを描画"""
-    bbox = draw.textbbox((0, 0), text, font=font)
-    tw = bbox[2] - bbox[0]
-    th = bbox[3] - bbox[1]
-    draw.text((x - tw / 2, y - th / 2), text, fill=color, font=font)
+def draw_centered_text(draw, x, y, text, font, color, tracking=0):
+    """中央揃えでテキストを描画。tracking で文字間を調整（負で詰め）。"""
+    if tracking == 0 or len(text) <= 1:
+        bbox = draw.textbbox((0, 0), text, font=font)
+        tw = bbox[2] - bbox[0]
+        th = bbox[3] - bbox[1]
+        draw.text((x - tw / 2, y - th / 2), text, fill=color, font=font)
+        return
+
+    # 各文字の幅を取得
+    char_widths = []
+    max_h = 0
+    for ch in text:
+        bbox = draw.textbbox((0, 0), ch, font=font)
+        char_widths.append(bbox[2] - bbox[0])
+        max_h = max(max_h, bbox[3] - bbox[1])
+
+    total_w = sum(char_widths) + tracking * (len(text) - 1)
+    cx = x - total_w / 2
+    cy = y - max_h / 2
+    for i, ch in enumerate(text):
+        draw.text((cx, cy), ch, fill=color, font=font)
+        cx += char_widths[i] + tracking
 
 
 def is_latin_char(ch):
@@ -517,13 +547,20 @@ def generate_calendar(config):
 
             # 日付描画
             day_str = str(day)
+            trk = DATE_TRACKING if len(day_str) >= 2 else 0
             if needs_prefix:
                 prefix_text = prefix + "/"
                 prefix_bbox = draw.textbbox((0, 0), prefix_text, font=fonts['month_prefix'])
+
+                # 日付部分の幅をトラッキング込みで計算
+                char_widths = []
+                for ch in day_str:
+                    cb = draw.textbbox((0, 0), ch, font=fonts['date'])
+                    char_widths.append(cb[2] - cb[0])
+                day_w = sum(char_widths) + trk * (len(day_str) - 1)
                 day_bbox = draw.textbbox((0, 0), day_str, font=fonts['date'])
 
                 prefix_w = prefix_bbox[2] - prefix_bbox[0]
-                day_w = day_bbox[2] - day_bbox[0]
                 total_w = prefix_w + day_w
 
                 start_x = x - total_w / 2
@@ -534,15 +571,17 @@ def generate_calendar(config):
                 draw.text((start_x, prefix_y), prefix_text,
                          fill=date_color, font=fonts['month_prefix'])
 
-                # 日付
+                # 日付（1文字ずつトラッキング付きで描画）
                 day_x = start_x + prefix_w
                 day_y = y_date - day_h / 2
-                draw.text((day_x, day_y), day_str,
-                         fill=date_color, font=fonts['date'])
+                for i, ch in enumerate(day_str):
+                    draw.text((day_x, day_y), ch,
+                             fill=date_color, font=fonts['date'])
+                    day_x += char_widths[i] + trk
             else:
                 # プレフィックスなし
                 draw_centered_text(draw, x, y_date, day_str,
-                                  fonts['date'], date_color)
+                                  fonts['date'], date_color, tracking=trk)
 
             # 営業時間描画
             hours = get_hours(day, month_offset, config)
